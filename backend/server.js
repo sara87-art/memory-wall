@@ -6,34 +6,33 @@ const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
-const path = require("path");
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const Post = require("./models/Post");
 
 
 
 const app = express();
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 console.log(__filename);
 console.log("🚀 NEW SERVER");
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/uploads", express.static("uploads"));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "memory-wall",
+    allowed_formats: ["jpg", "jpeg", "png", "webp"],
   },
 });
-app.use((req, res, next) => {
-  console.log(req.method, req.url);
-  next();
-});
+
 const upload = multer({ storage });
 app.post("/register", async (req, res) => {
   console.log("REGISTER ROUTE HIT");
@@ -149,7 +148,7 @@ app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   const newPost = await Post.create({
   text: req.body.text,
 
-  image: req.file ? `/uploads/${req.file.filename}` : "",
+  image: req.file ? req.file.path : "",
 
   userId: req.user.id,
 
@@ -207,22 +206,32 @@ app.delete("/posts/:id", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
 
+    console.log("POST =", post);
+    console.log("USERID =", post?.userId);
+    console.log("TOKEN USER =", req.user.id);
+
     if (!post) {
       return res.status(404).json({
         message: "Post not found",
       });
     }
 
-    const user = await User.findById(req.user.id);
+   const user = await User.findById(req.user.id);
 
-    if (
-      post.userId.toString() !== req.user.id &&
-      user.role !== "admin"
-    ) {
-      return res.status(403).json({
-        message: "You are not allowed to delete this post",
-      });
-    }
+if (
+  post.userId.toString() !== req.user.id &&
+  user.role !== "admin"
+) {
+  return res.status(403).json({
+    message: "You are not allowed to delete this post",
+  });
+}
+
+await post.deleteOne();
+
+res.json({
+  message: "Post deleted",
+});
 
     await post.deleteOne();
 
