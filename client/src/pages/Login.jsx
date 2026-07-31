@@ -8,7 +8,7 @@ function Login({ onLogin, goToSignup }) {
     e.preventDefault();
 
    try {
-  const res = await fetch("http://localhost:5001/login", {
+ const res = await fetch("https://memory-wall-rvkm.onrender.com/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

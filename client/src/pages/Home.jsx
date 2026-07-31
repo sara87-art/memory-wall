@@ -19,7 +19,7 @@ function Home({ onLogout, username }) {
   //}, [posts]);
   useEffect(() => {
     async function getPosts() {
-      const response = await fetch("http://localhost:5001/posts");
+    const response = await fetch("https://memory-wall-rvkm.onrender.com/posts");
       const data = await response.json();
       console.log(data);
       console.log(data[0]);
@@ -40,7 +40,7 @@ function Home({ onLogout, username }) {
     }
 
     try {
-      const response = await fetch("http://localhost:5001/posts", {
+      const response = await fetch("https://memory-wall-rvkm.onrender.com/posts", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -72,7 +72,7 @@ function Home({ onLogout, username }) {
     const post = posts[index];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/like`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/like`,
       {
         method: "PATCH",
       },
@@ -93,7 +93,7 @@ function Home({ onLogout, username }) {
   const token = localStorage.getItem("token");
 
   const response = await fetch(
-    `http://localhost:5001/posts/${post._id || post.id}`,
+    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
     {
       method: "DELETE",
       headers: {
@@ -124,7 +124,7 @@ function Home({ onLogout, username }) {
   const post = posts[editIndex];
 
   const response = await fetch(
-    `http://localhost:5001/posts/${post._id || post.id}`,
+    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
     {
       method: "PUT",
       headers: {
@@ -159,7 +159,7 @@ function Home({ onLogout, username }) {
     const post = posts[index];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/comments`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments`,
       {
         method: "POST",
         headers: {
@@ -186,7 +186,7 @@ function Home({ onLogout, username }) {
     const comment = post.comments[commentIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/comments/${comment._id || comment.id}/like`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/like`,
       {
         method: "PATCH",
       },
@@ -208,7 +208,7 @@ function Home({ onLogout, username }) {
     const comment = post.comments[commentIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
       {
         method: "POST",
         headers: {
@@ -236,7 +236,7 @@ function Home({ onLogout, username }) {
     if (!suggestText.trim() || !editAuthor.trim()) return;
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/edit-request`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/edit-request`,
       {
         method: "POST",
         headers: {
@@ -250,7 +250,7 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("http://localhost:5001/posts");
+      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
       const data = await refreshed.json();
       setPosts(data);
 
@@ -267,7 +267,7 @@ function Home({ onLogout, username }) {
     const post = posts[postIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/edit-request/${editId}/approve`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/edit-request/${editId}/approve`,
       {
         method: "PATCH",
         headers: {
@@ -277,7 +277,7 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("http://localhost:5001/posts");
+      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
       const data = await refreshed.json();
       setPosts(data);
     }
@@ -286,7 +286,7 @@ function Home({ onLogout, username }) {
     const post = posts[postIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/edit-request/${editId}`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/edit-request/${editId}`,
       {
         method: "DELETE",
         headers: {
@@ -296,7 +296,7 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("http://localhost:5001/posts");
+      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
       const data = await refreshed.json();
       setPosts(data);
     }
@@ -305,14 +305,14 @@ function Home({ onLogout, username }) {
     const post = posts[postIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id || post.id}/approved-edits/${editId}/like`,
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/approved-edits/${editId}/like`,
       {
         method: "PATCH",
       },
     );
 
     if (response.ok) {
-      const refreshed = await fetch("http://localhost:5001/posts");
+      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
       const data = await refreshed.json();
 
       setPosts(data);

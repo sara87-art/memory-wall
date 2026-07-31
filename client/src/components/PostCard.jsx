@@ -41,7 +41,7 @@ const canEdit =
   role === "admin" || post.username === username;
   return (
     <div className="post">
-      <img src={`http://localhost:5001${post.image}`} alt="" />
+    <img src={`https://memory-wall-rvkm.onrender.com${post.image}`}  alt="" />
 
       {editIndex === index ? (
         <>
