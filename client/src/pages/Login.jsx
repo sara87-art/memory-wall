@@ -29,7 +29,7 @@ function Login({ onLogin, goToSignup }) {
 localStorage.setItem("username", data.username);
 localStorage.setItem("role", data.role);
 
-onLogin();
+onLogin(data.username, data.role);
 } catch (error) {
   alert("حدث خطأ أثناء تسجيل الدخول");
 }

@@ -33,15 +33,13 @@ function PostCard({
   likeApprovedEdit,
 }) {
   const username = localStorage.getItem("username");
-const role = localStorage.getItem("role");
+  const role = localStorage.getItem("role");
 
-const canEdit =
-  role === "admin" || post.username === username;
-  const canManageEdits =
-  role === "admin" || post.username === username;
+  const canEdit = role === "admin" || post.username === username;
+  const canManageEdits = role === "admin" || post.username === username;
   return (
     <div className="post">
-    <img src={`https://memory-wall-rvkm.onrender.com${post.image}`}  alt="" />
+      <img src={post.image} alt="" />
 
       {editIndex === index ? (
         <>
@@ -62,11 +60,9 @@ const canEdit =
           <h4>👤 {post.username}</h4>
           <p>{post.text}</p>{" "}
           <div className="button-group">
-           {canEdit && (
-  <button onClick={() => startEdit(index)}>
-    ✏️ تعديل
-  </button>
-)}{" "}
+            {canEdit && (
+              <button onClick={() => startEdit(index)}>✏️ تعديل</button>
+            )}{" "}
             <button
               onClick={() =>
                 setShowEditBox((prev) => ({
@@ -83,35 +79,35 @@ const canEdit =
               <br />
 
               <div className="edit-request-box">
-  <input
-    type="text"
-    placeholder="اسمك"
-    value={editAuthor}
-    onChange={(e) => setEditAuthor(e.target.value)}
-  />
+                <input
+                  type="text"
+                  placeholder="اسمك"
+                  value={editAuthor}
+                  onChange={(e) => setEditAuthor(e.target.value)}
+                />
 
-  <textarea
-    placeholder="اكتب التعديل المقترح..."
-    value={suggestText}
-    onChange={(e) => setSuggestText(e.target.value)}
-  />
+                <textarea
+                  placeholder="اكتب التعديل المقترح..."
+                  value={suggestText}
+                  onChange={(e) => setSuggestText(e.target.value)}
+                />
 
-  <button onClick={() => sendEditRequest(index)}>
-    إرسال الطلب
-  </button>
-</div>
+                <button onClick={() => sendEditRequest(index)}>
+                  إرسال الطلب
+                </button>
+              </div>
             </>
           )}
         </>
       )}
 
-     <PostActions
-  post={post}
-  likes={post.likes}
-  addLike={addLike}
-  deletePost={deletePost}
-/>
-    {canManageEdits && post.pendingEdits?.length > 0 && (
+      <PostActions
+        post={post}
+        likes={post.likes}
+        addLike={addLike}
+        deletePost={deletePost}
+      />
+      {canManageEdits && post.pendingEdits?.length > 0 && (
         <>
           <h4>🕓 طلبات التعديل ({post.pendingEdits.length})</h4>{" "}
           {post.pendingEdits.map((edit) => (
