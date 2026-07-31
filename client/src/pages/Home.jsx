@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import PostCard from "../components/PostCard";
 import PostForm from "../components/PostForm";
-function Home({ onLogout }) {
+function Home({ onLogout, username }) {
   const [comment, setComment] = useState("");
   const [text, setText] = useState("");
   const [image, setImage] = useState(null);
@@ -42,6 +42,9 @@ function Home({ onLogout }) {
     try {
       const response = await fetch("http://localhost:5001/posts", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: formData,
       });
 
@@ -85,17 +88,28 @@ function Home({ onLogout }) {
     }
   }
   async function deletePost(index) {
-    const post = posts[index];
+  const post = posts[index];
 
-    const response = await fetch(`http://localhost:5001/posts/${post._id || post.id}`, {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `http://localhost:5001/posts/${post._id || post.id}`,
+    {
       method: "DELETE",
-    });
-
-    if (response.ok) {
-      const newPosts = posts.filter((_, i) => i !== index);
-      setPosts(newPosts);
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
+  );
+
+  if (response.ok) {
+    const newPosts = posts.filter((_, i) => i !== index);
+    setPosts(newPosts);
+  } else {
+    const data = await response.json();
+    alert(data.message);
   }
+}
   function startEdit(index) {
     if (index === null) {
       setEditIndex(null);
@@ -107,29 +121,38 @@ function Home({ onLogout }) {
     setEditText(posts[index].text);
   }
   async function saveEdit() {
-    const post = posts[editIndex];
+  const post = posts[editIndex];
 
-    const response = await fetch(`http://localhost:5001/posts/${post._id || post.id}`, {
+  const response = await fetch(
+    `http://localhost:5001/posts/${post._id || post.id}`,
+    {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify({
         text: editText,
       }),
-    });
+    }
+  );
 
-    const updatedPost = await response.json();
-
-    const newPosts = [...posts];
-
-    newPosts[editIndex] = updatedPost;
-
-    setPosts(newPosts);
-
-    setEditIndex(null);
-    setEditText("");
+  if (!response.ok) {
+    const data = await response.json();
+    alert(data.message);
+    return;
   }
+
+  const updatedPost = await response.json();
+
+  const newPosts = [...posts];
+  newPosts[editIndex] = updatedPost;
+
+  setPosts(newPosts);
+
+  setEditIndex(null);
+  setEditText("");
+}
   async function addComment(index) {
     if (!comment.trim()) return;
 
@@ -185,7 +208,7 @@ function Home({ onLogout }) {
     const comment = post.comments[commentIndex];
 
     const response = await fetch(
-      `http://localhost:5001/posts/${post._id|| post.id}/comments/${comment._id || comment.id}/replies`,
+      `http://localhost:5001/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
       {
         method: "POST",
         headers: {
@@ -245,12 +268,12 @@ function Home({ onLogout }) {
 
     const response = await fetch(
       `http://localhost:5001/posts/${post._id || post.id}/edit-request/${editId}/approve`,
-    {
-  method: "PATCH",
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-}
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
     );
 
     if (response.ok) {
@@ -264,12 +287,12 @@ function Home({ onLogout }) {
 
     const response = await fetch(
       `http://localhost:5001/posts/${post._id || post.id}/edit-request/${editId}`,
-     {
-  method: "DELETE",
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-}
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      },
     );
 
     if (response.ok) {
@@ -297,19 +320,13 @@ function Home({ onLogout }) {
   }
   return (
     <>
-    <button
-  onClick={onLogout}
-  style={{
-    position: "fixed",
-    top: "20px",
-    left: "20px",
-    padding: "10px 18px",
-    cursor: "pointer",
-    zIndex: 999,
-  }}
->
+      <button onClick={onLogout} className="logout-btn">
   Logout
 </button>
+
+<div className="welcome-box">
+  Welcome, <span className="username">{username}</span>
+</div>
       <div className="container">
         <h1>Memory Wall</h1>
         <PostForm

@@ -670,3 +670,84 @@ hr,
 
 .reply-box input {
   flex: 1;}
+  /* Logout Button */
+
+.logout-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 999;
+ 
+  padding: 12px 22px;
+  border: 1px solid rgba(196, 190, 190, 0.2);
+  border-radius: 15px;
+ 
+  background: rgba(36, 33, 33, 0.08);
+  backdrop-filter: blur(10px);
+ 
+  color: rgb(195, 192, 192);
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+ 
+  transition: all .3s ease;
+}
+ 
+.logout-btn:hover {
+  transform: translateY(-3px);
+  background: rgba(26, 25, 25, 0.18);
+  box-shadow: 0 0 20px rgba(56, 54, 54, 0.25);
+  border-color: rgba(220, 215, 230, 0.35);
+}
+ 
+.logout-btn:active {
+  transform: translateY(-1px);
+}
+ 
+ 
+/* Welcome */
+ 
+.welcome-box {
+  position: fixed;
+  top: 80px;
+  left: 20px;
+  z-index: 999;
+ 
+  color: rgb(242, 240, 240);
+  font-size: 15px;
+  font-weight: bold;
+ 
+  text-shadow: 0 0 10px rgba(255,255,255,.4);
+}
+ 
+ 
+/* Username Animation */
+ 
+.username {
+  background: linear-gradient(
+    90deg,
+    #d1cddd,
+    #f5f4f5,
+    #f3eff4,
+    #fbfbfc,
+    #a194b0
+  );
+ 
+  background-size: 300%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+ 
+  animation: usernameColors 6s linear infinite, usernameGlow 2.4s ease-in-out infinite;
+}
+ .edit-request-box {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+}

@@ -1,3 +1,4 @@
+const User = require("./models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 require("dotenv").config();
@@ -10,9 +11,9 @@ const path = require("path");
 const Post = require("./models/Post");
 
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "1234";
+
 const app = express();
+console.log(__filename);
 console.log("🚀 NEW SERVER");
 app.use(cors());
 app.use(express.json());
@@ -29,34 +30,86 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + path.extname(file.originalname));
   },
 });
-
+app.use((req, res, next) => {
+  console.log(req.method, req.url);
+  next();
+});
 const upload = multer({ storage });
-app.post("/login", async (req, res) => {
-  const { username, password } = req.body;
+app.post("/register", async (req, res) => {
+  console.log("REGISTER ROUTE HIT");
+  console.log(req.body);
 
-  if (username !== ADMIN_USERNAME) {
-    return res.status(401).json({
-      message: "Invalid credentials",
+  try {
+    const { username, password } = req.body;
+
+    const existingUser = await User.findOne({ username });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Username already exists",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      username,
+      password: hashedPassword,
+      role: "user",
+    });
+
+    res.status(201).json({
+      message: "Account created",
+      id: user._id,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: err.message,
     });
   }
+});
+app.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
 
-  
+    const user = await User.findOne({ username });
 
- if (password !== ADMIN_PASSWORD) {
-  return res.status(401).json({
-    message: "Invalid credentials",
-  });
-}
-
-  const token = jwt.sign(
-    { username },
-    process.env.JWT_SECRET,
-    {
-      expiresIn: "7d",
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid username or password",
+      });
     }
-  );
 
-  res.json({ token });
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+  res.json({
+  token,
+  username: user.username,
+  role: user.role,
+});
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 function verifyToken(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -91,21 +144,25 @@ app.get("/posts", async (req, res) => {
   }
 });
 
-app.post("/posts", upload.single("image"), async (req, res) => {
+app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
-    const newPost = await Post.create({
-      text: req.body.text,
+  const newPost = await Post.create({
+  text: req.body.text,
 
-      image: req.file ? `/uploads/${req.file.filename}` : "",
+  image: req.file ? `/uploads/${req.file.filename}` : "",
 
-      likes: 0,
+  userId: req.user.id,
 
-      comments: [],
+  username: req.user.username,
 
-      pendingEdits: [],
+  likes: 0,
 
-      approvedEdits: [],
-    });
+  comments: [],
+
+  pendingEdits: [],
+
+  approvedEdits: [],
+});
 
     res.status(201).json(newPost);
   } catch (error) {
@@ -114,23 +171,30 @@ app.post("/posts", upload.single("image"), async (req, res) => {
     });
   }
 });
-app.put("/posts/:id", async (req, res) => {
+app.put("/posts/:id", verifyToken, async (req, res) => {
   try {
-    const post = await Post.findByIdAndUpdate(
-      req.params.id,
-      {
-        text: req.body.text,
-      },
-      {
-        new: true,
-      }
-    );
+    const post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
         message: "Post not found",
       });
     }
+
+   const user = await User.findById(req.user.id);
+
+if (
+  post.userId.toString() !== req.user.id &&
+  user.role !== "admin"
+) {
+  return res.status(403).json({
+   message: "You are not allowed to edit this post",
+  });
+}
+
+    post.text = req.body.text;
+
+    await post.save();
 
     res.json(post);
   } catch (error) {
@@ -139,15 +203,28 @@ app.put("/posts/:id", async (req, res) => {
     });
   }
 });
-app.delete("/posts/:id", async (req, res) => {
+app.delete("/posts/:id", verifyToken, async (req, res) => {
   try {
-    const post = await Post.findByIdAndDelete(req.params.id);
+    const post = await Post.findById(req.params.id);
 
     if (!post) {
       return res.status(404).json({
         message: "Post not found",
       });
     }
+
+    const user = await User.findById(req.user.id);
+
+    if (
+      post.userId.toString() !== req.user.id &&
+      user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        message: "You are not allowed to delete this post",
+      });
+    }
+
+    await post.deleteOne();
 
     res.json({
       message: "Post deleted",
@@ -318,6 +395,17 @@ app.patch("/posts/:id/edit-request/:editId/approve", verifyToken, async (req, re
       });
     }
 
+    const user = await User.findById(req.user.id);
+
+    if (
+      post.userId.toString() !== req.user.id &&
+      user.role !== "admin"
+    ) {
+      return res.status(403).json({
+        message: "You are not allowed to approve edits",
+      });
+    }
+
     const edit = post.pendingEdits.id(req.params.editId);
 
     if (!edit) {
@@ -354,7 +442,16 @@ app.delete("/posts/:id/edit-request/:editId", verifyToken, async (req, res) => {
         message: "Post not found",
       });
     }
+const user = await User.findById(req.user.id);
 
+if (
+  post.userId.toString() !== req.user.id &&
+  user.role !== "admin"
+) {
+  return res.status(403).json({
+    message: "You are not allowed to reject edits",
+  });
+}
     const edit = post.pendingEdits.id(req.params.editId);
 
     if (!edit) {
@@ -413,6 +510,7 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+  
 app.listen(5001, () => {
   console.log("Server running on http://localhost:5001");
 });

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-function Login({ onLogin }) {
+function Login({ onLogin, goToSignup }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -25,9 +25,11 @@ function Login({ onLogin }) {
     return alert(data.message);
   }
 
-  localStorage.setItem("token", data.token);
+ localStorage.setItem("token", data.token);
+localStorage.setItem("username", data.username);
+localStorage.setItem("role", data.role);
 
-  onLogin();
+onLogin();
 } catch (error) {
   alert("حدث خطأ أثناء تسجيل الدخول");
 }
@@ -35,7 +37,7 @@ function Login({ onLogin }) {
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
-      <h2>Admin Login</h2>
+      <h2>Welcome Back</h2>
 
       <form onSubmit={handleLogin}>
         <input
@@ -57,6 +59,17 @@ function Login({ onLogin }) {
         <br /><br />
 
         <button type="submit">Login</button>
+        <br />
+<br />
+
+<p>Don't have an account?</p>
+
+<button
+  type="button"
+  onClick={goToSignup}
+>
+  Create Account
+</button>
       </form>
     </div>
   );

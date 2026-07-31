@@ -1,5 +1,9 @@
-function PostActions({ likes, addLike, deletePost }) {
-  const isAdmin = !!localStorage.getItem("token");
+function PostActions({ likes, addLike, deletePost, post }) {
+  const username = localStorage.getItem("username");
+const role = localStorage.getItem("role");
+
+const canDelete =
+  role === "admin" || post.username === username;
   return (
     <div>
       <p>❤️ {likes}</p>
@@ -9,7 +13,7 @@ function PostActions({ likes, addLike, deletePost }) {
     ❤️ إعجاب
   </button>
 
-  {isAdmin && (
+ {canDelete && (
   <button onClick={deletePost}>
     🗑️ حذف
   </button>

@@ -28,6 +28,15 @@ const postSchema = new mongoose.Schema(
 
     image: String,
 
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    username: {
+      type: String,
+    },
+
     likes: {
       type: Number,
       default: 0,
@@ -43,5 +52,6 @@ const postSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 
 module.exports = mongoose.model("Post", postSchema);
