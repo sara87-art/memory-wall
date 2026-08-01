@@ -11,8 +11,6 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const Post = require("./models/Post");
 
-
-
 const app = express();
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -40,12 +38,29 @@ app.post("/register", async (req, res) => {
 
   try {
     const { username, password } = req.body;
+    const reservedNames = [
+      "admin",
+      "administrator",
+      "support",
+      "owner",
+      "memorywall",
+      "moderator",
+    ];
 
+    if (reservedNames.includes(username.toLowerCase())) {
+      return res.status(400).json({
+        message: "هذا الاسم محجوز، اختر اسمًا آخر.",
+      });
+    }
+    if (username.length < 3) {
+      return res.status(400).json({
+        message: "اسم المستخدم يجب أن يكون 3 أحرف على الأقل.",
+      });
+    }
     const existingUser = await User.findOne({ username });
-
     if (existingUser) {
       return res.status(400).json({
-        message: "Username already exists",
+        message: "هذا الاسم مستخدم بالفعل، الرجاء اختيار اسم آخر.",
       });
     }
 
@@ -96,14 +111,14 @@ app.post("/login", async (req, res) => {
       process.env.JWT_SECRET,
       {
         expiresIn: "7d",
-      }
+      },
     );
 
-  res.json({
-  token,
-  username: user.username,
-  role: user.role,
-});
+    res.json({
+      token,
+      username: user.username,
+      role: user.role,
+    });
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -145,23 +160,23 @@ app.get("/posts", async (req, res) => {
 
 app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
-  const newPost = await Post.create({
-  text: req.body.text,
+    const newPost = await Post.create({
+      text: req.body.text,
 
-  image: req.file ? req.file.path : "",
+      image: req.file ? req.file.path : "",
 
-  userId: req.user.id,
+      userId: req.user.id,
 
-  username: req.user.username,
+      username: req.user.username,
 
-  likes: 0,
+      likes: 0,
 
-  comments: [],
+      comments: [],
 
-  pendingEdits: [],
+      pendingEdits: [],
 
-  approvedEdits: [],
-});
+      approvedEdits: [],
+    });
 
     res.status(201).json(newPost);
   } catch (error) {
@@ -180,16 +195,13 @@ app.put("/posts/:id", verifyToken, async (req, res) => {
       });
     }
 
-   const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
-if (
-  post.userId.toString() !== req.user.id &&
-  user.role !== "admin"
-) {
-  return res.status(403).json({
-   message: "You are not allowed to edit this post",
-  });
-}
+    if (post.userId.toString() !== req.user.id && user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not allowed to edit this post",
+      });
+    }
 
     post.text = req.body.text;
 
@@ -216,22 +228,13 @@ app.delete("/posts/:id", verifyToken, async (req, res) => {
       });
     }
 
-   const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
-if (
-  post.userId.toString() !== req.user.id &&
-  user.role !== "admin"
-) {
-  return res.status(403).json({
-    message: "You are not allowed to delete this post",
-  });
-}
-
-await post.deleteOne();
-
-res.json({
-  message: "Post deleted",
-});
+    if (post.userId.toString() !== req.user.id && user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not allowed to delete this post",
+      });
+    }
 
     await post.deleteOne();
 
@@ -368,9 +371,7 @@ app.post("/posts/:id/edit-request", async (req, res) => {
 
     await post.save();
 
-    res.status(201).json(
-      post.pendingEdits[post.pendingEdits.length - 1]
-    );
+    res.status(201).json(post.pendingEdits[post.pendingEdits.length - 1]);
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -394,54 +395,55 @@ app.get("/posts/:id/edit-requests", async (req, res) => {
     });
   }
 });
-app.patch("/posts/:id/edit-request/:editId/approve", verifyToken, async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.id);
+app.patch(
+  "/posts/:id/edit-request/:editId/approve",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
 
-    if (!post) {
-      return res.status(404).json({
-        message: "Post not found",
+      if (!post) {
+        return res.status(404).json({
+          message: "Post not found",
+        });
+      }
+
+      const user = await User.findById(req.user.id);
+
+      if (post.userId.toString() !== req.user.id && user.role !== "admin") {
+        return res.status(403).json({
+          message: "You are not allowed to approve edits",
+        });
+      }
+
+      const edit = post.pendingEdits.id(req.params.editId);
+
+      if (!edit) {
+        return res.status(404).json({
+          message: "Edit not found",
+        });
+      }
+
+      post.approvedEdits.push({
+        author: edit.author,
+        text: edit.text,
+        likes: 0,
+      });
+
+      edit.deleteOne();
+
+      await post.save();
+
+      res.json({
+        message: "Approved",
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: error.message,
       });
     }
-
-    const user = await User.findById(req.user.id);
-
-    if (
-      post.userId.toString() !== req.user.id &&
-      user.role !== "admin"
-    ) {
-      return res.status(403).json({
-        message: "You are not allowed to approve edits",
-      });
-    }
-
-    const edit = post.pendingEdits.id(req.params.editId);
-
-    if (!edit) {
-      return res.status(404).json({
-        message: "Edit not found",
-      });
-    }
-
-    post.approvedEdits.push({
-      author: edit.author,
-      text: edit.text,
-      likes: 0,
-    });
-
-    edit.deleteOne();
-
-    await post.save();
-
-    res.json({
-      message: "Approved",
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
+  },
+);
 app.delete("/posts/:id/edit-request/:editId", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -451,16 +453,13 @@ app.delete("/posts/:id/edit-request/:editId", verifyToken, async (req, res) => {
         message: "Post not found",
       });
     }
-const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
-if (
-  post.userId.toString() !== req.user.id &&
-  user.role !== "admin"
-) {
-  return res.status(403).json({
-    message: "You are not allowed to reject edits",
-  });
-}
+    if (post.userId.toString() !== req.user.id && user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not allowed to reject edits",
+      });
+    }
     const edit = post.pendingEdits.id(req.params.editId);
 
     if (!edit) {
@@ -519,7 +518,36 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
-  
+app.patch(
+  "/users/avatar",
+  verifyToken,
+  upload.single("avatar"),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.user.id);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "User not found",
+        });
+      }
+
+      user.avatar = req.file.path;
+
+      await user.save();
+
+      res.json({
+        message: "Avatar updated",
+        avatar: user.avatar,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: error.message,
+      });
+    }
+  },
+);
+
 app.listen(5001, () => {
   console.log("Server running on http://localhost:5001");
 });
