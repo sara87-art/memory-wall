@@ -36,7 +36,10 @@ const postSchema = new mongoose.Schema(
     username: {
       type: String,
     },
-
+avatar: {
+  type: String,
+  default: "",
+},
     likes: {
       type: Number,
       default: 0,

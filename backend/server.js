@@ -160,6 +160,7 @@ app.get("/posts", async (req, res) => {
 
 app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
+   const user = await User.findById(req.user.id);
     const newPost = await Post.create({
       text: req.body.text,
 
@@ -168,6 +169,7 @@ app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
       userId: req.user.id,
 
       username: req.user.username,
+      avatar: user.avatar,
 
       likes: 0,
 
