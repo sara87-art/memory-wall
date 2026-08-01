@@ -3,41 +3,53 @@ import { useState } from "react";
 function Signup({ onSignup, goToLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+const [message, setMessage] = useState("");
+const [messageType, setMessageType] = useState("");
   const handleSignup = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch("https://memory-wall-rvkm.onrender.com/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://memory-wall-rvkm.onrender.com/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
         },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      });
+      );
 
       const data = await res.json();
+      console.log("Register status:", res.status);
+      console.log("Register response:", data);
+    if (!res.ok) {
+  setMessage(data.message);
+  setMessageType("error");
+  return;
+}
 
-      if (!res.ok) {
-        return alert(data.message);
-      }
+setMessage("تم إنشاء الحساب بنجاح ");
+setMessageType("success");
 
-      alert("Account created successfully");
-
-      goToLogin();
+setTimeout(() => {
+  goToLogin();
+}, 1500);
     } catch (error) {
-      alert("حدث خطأ أثناء إنشاء الحساب");
-    }
+  setMessage("حدث خطأ أثناء إنشاء الحساب");
+  setMessageType("error");
+}
   };
 
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Create Account</h2>
 
-      <form onSubmit={handleSignup}>
+      <form onSubmit={handleSignup}
+      >
         <input
           type="text"
           placeholder="Username"
@@ -45,7 +57,8 @@ function Signup({ onSignup, goToLogin }) {
           onChange={(e) => setUsername(e.target.value)}
         />
 
-        <br /><br />
+        <br />
+        <br />
 
         <input
           type="password"
@@ -54,16 +67,20 @@ function Signup({ onSignup, goToLogin }) {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <br /><br />
+        <br />
+        <br />
 
         <button type="submit">Create Account</button>
+        {message && (
+  <p className={`message ${messageType}`}>
+    {message}
+  </p>
+)}
       </form>
 
       <br />
 
-      <button onClick={goToLogin}>
-        Back to Login
-      </button>
+      <button onClick={goToLogin}>Back to Login</button>
     </div>
   );
 }

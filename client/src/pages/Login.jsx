@@ -4,35 +4,36 @@ function Login({ onLogin, goToSignup }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin =async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-   try {
- const res = await fetch("https://memory-wall-rvkm.onrender.com/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      username,
-      password,
-    }),
-  });
+    try {
+      const res = await fetch("https://memory-wall-rvkm.onrender.com/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+      });
 
-  const data = await res.json();
+      const data = await res.json();
+      console.log("Status:", res.status);
+      console.log("Response:", data);
+      if (!res.ok) {
+        return alert(data.message);
+      }
 
-  if (!res.ok) {
-    return alert(data.message);
-  }
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("role", data.role);
 
- localStorage.setItem("token", data.token);
-localStorage.setItem("username", data.username);
-localStorage.setItem("role", data.role);
-
-onLogin(data.username, data.role);
-} catch (error) {
-  alert("حدث خطأ أثناء تسجيل الدخول");
-}
+      onLogin(data.username, data.role);
+    } catch (error) {
+      alert("حدث خطأ أثناء تسجيل الدخول");
+    }
   };
 
   return (
@@ -47,7 +48,8 @@ onLogin(data.username, data.role);
           onChange={(e) => setUsername(e.target.value)}
         />
 
-        <br /><br />
+        <br />
+        <br />
 
         <input
           type="password"
@@ -56,20 +58,18 @@ onLogin(data.username, data.role);
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <br /><br />
+        <br />
+        <br />
 
         <button type="submit">Login</button>
         <br />
-<br />
+        <br />
 
-<p>Don't have an account?</p>
+        <p>Don't have an account?</p>
 
-<button
-  type="button"
-  onClick={goToSignup}
->
-  Create Account
-</button>
+        <button type="button" onClick={goToSignup}>
+          Create Account
+        </button>
       </form>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import PostCard from "../components/PostCard";
 import PostForm from "../components/PostForm";
+import Navbar from "../components/Navbar";
 function Home({ onLogout, username }) {
   const [comment, setComment] = useState("");
   const [text, setText] = useState("");
@@ -14,12 +15,16 @@ function Home({ onLogout, username }) {
   const [editAuthor, setEditAuthor] = useState("");
   const [suggestText, setSuggestText] = useState("");
   const [showEditBox, setShowEditBox] = useState({});
+  const [currentPage, setCurrentPage] = useState("home");
+  const [avatar, setAvatar] = useState(null);
   //useEffect(() => {
   //localStorage.setItem("posts", JSON.stringify(posts));
   //}, [posts]);
   useEffect(() => {
     async function getPosts() {
-    const response = await fetch("https://memory-wall-rvkm.onrender.com/posts");
+      const response = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+      );
       const data = await response.json();
       console.log(data);
       console.log(data[0]);
@@ -40,13 +45,16 @@ function Home({ onLogout, username }) {
     }
 
     try {
-      const response = await fetch("https://memory-wall-rvkm.onrender.com/posts", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
+      const response = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: formData,
         },
-        body: formData,
-      });
+      );
 
       console.log("Status:", response.status);
 
@@ -88,28 +96,28 @@ function Home({ onLogout, username }) {
     }
   }
   async function deletePost(index) {
-  const post = posts[index];
+    const post = posts[index];
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  const response = await fetch(
-    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    }
-  );
+    );
 
-  if (response.ok) {
-    const newPosts = posts.filter((_, i) => i !== index);
-    setPosts(newPosts);
-  } else {
-    const data = await response.json();
-    alert(data.message);
+    if (response.ok) {
+      const newPosts = posts.filter((_, i) => i !== index);
+      setPosts(newPosts);
+    } else {
+      const data = await response.json();
+      alert(data.message);
+    }
   }
-}
   function startEdit(index) {
     if (index === null) {
       setEditIndex(null);
@@ -121,38 +129,38 @@ function Home({ onLogout, username }) {
     setEditText(posts[index].text);
   }
   async function saveEdit() {
-  const post = posts[editIndex];
+    const post = posts[editIndex];
 
-  const response = await fetch(
-    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
+    const response = await fetch(
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          text: editText,
+        }),
       },
-      body: JSON.stringify({
-        text: editText,
-      }),
+    );
+
+    if (!response.ok) {
+      const data = await response.json();
+      alert(data.message);
+      return;
     }
-  );
 
-  if (!response.ok) {
-    const data = await response.json();
-    alert(data.message);
-    return;
+    const updatedPost = await response.json();
+
+    const newPosts = [...posts];
+    newPosts[editIndex] = updatedPost;
+
+    setPosts(newPosts);
+
+    setEditIndex(null);
+    setEditText("");
   }
-
-  const updatedPost = await response.json();
-
-  const newPosts = [...posts];
-  newPosts[editIndex] = updatedPost;
-
-  setPosts(newPosts);
-
-  setEditIndex(null);
-  setEditText("");
-}
   async function addComment(index) {
     if (!comment.trim()) return;
 
@@ -250,7 +258,9 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
+      const refreshed = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+      );
       const data = await refreshed.json();
       setPosts(data);
 
@@ -277,7 +287,9 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
+      const refreshed = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+      );
       const data = await refreshed.json();
       setPosts(data);
     }
@@ -296,7 +308,9 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
+      const refreshed = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+      );
       const data = await refreshed.json();
       setPosts(data);
     }
@@ -312,69 +326,147 @@ function Home({ onLogout, username }) {
     );
 
     if (response.ok) {
-      const refreshed = await fetch("https://memory-wall-rvkm.onrender.com/posts");
+      const refreshed = await fetch(
+        "https://memory-wall-rvkm.onrender.com/posts",
+      );
       const data = await refreshed.json();
 
       setPosts(data);
     }
   }
+  async function uploadAvatar() {
+    if (!avatar) return;
+
+    const formData = new FormData();
+    formData.append("avatar", avatar);
+
+    const response = await fetch(
+      "https://memory-wall-rvkm.onrender.com/users/avatar",
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: formData,
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return alert(data.message);
+    }
+
+    localStorage.setItem("avatar", data.avatar);
+
+    alert("تم تغيير الصورة الشخصية بنجاح ");
+  }
   return (
     <>
-      <button onClick={onLogout} className="logout-btn">
-  Logout
-</button>
-
-<div className="welcome-box">
-  Welcome, <span className="username">{username}</span>
-</div>
-      <div className="container">
-        <h1>Memory Wall</h1>
-        <PostForm
-          text={text}
-          setText={setText}
-          setImage={setImage}
-          addPost={addPost}
-        />
-
-        <hr />
-
-        <h3>المنشورات</h3>
-        {posts.filter(Boolean).map((post, index) => (
-          <PostCard
-            key={post._id || post.id}
-            index={index}
-            post={post}
-            addLike={() => addLike(index)}
-            deletePost={() => deletePost(index)}
-            editIndex={editIndex}
-            editText={editText}
-            setEditText={setEditText}
-            startEdit={startEdit}
-            saveEdit={saveEdit}
-            comment={comment}
-            setComment={setComment}
-            addComment={addComment}
-            addCommentLike={addCommentLike}
-            showAllComments={showAllComments}
-            setShowAllComments={setShowAllComments}
-            reply={reply}
-            setReply={setReply}
-            addReply={addReply}
-            replyIndex={replyIndex}
-            setReplyIndex={setReplyIndex}
-            editAuthor={editAuthor}
-            setEditAuthor={setEditAuthor}
-            showEditBox={showEditBox}
-            setShowEditBox={setShowEditBox}
-            sendEditRequest={sendEditRequest}
-            suggestText={suggestText}
-            setSuggestText={setSuggestText}
-            approveEdit={approveEdit}
-            rejectEdit={rejectEdit}
-            likeApprovedEdit={likeApprovedEdit}
+      <Navbar
+        username={username}
+        onLogout={onLogout}
+        setCurrentPage={setCurrentPage}
+      />
+      {currentPage === "home" && (
+        <div className="container">
+          <PostForm
+            text={text}
+            setText={setText}
+            setImage={setImage}
+            addPost={addPost}
           />
-        ))}
-      </div>
+
+          <hr />
+
+          <h3>المنشورات</h3>
+          {posts.filter(Boolean).map((post, index) => (
+            <PostCard
+              key={post._id || post.id}
+              index={index}
+              post={post}
+              addLike={() => addLike(index)}
+              deletePost={() => deletePost(index)}
+              editIndex={editIndex}
+              editText={editText}
+              setEditText={setEditText}
+              startEdit={startEdit}
+              saveEdit={saveEdit}
+              comment={comment}
+              setComment={setComment}
+              addComment={addComment}
+              addCommentLike={addCommentLike}
+              showAllComments={showAllComments}
+              setShowAllComments={setShowAllComments}
+              reply={reply}
+              setReply={setReply}
+              addReply={addReply}
+              replyIndex={replyIndex}
+              setReplyIndex={setReplyIndex}
+              editAuthor={editAuthor}
+              setEditAuthor={setEditAuthor}
+              showEditBox={showEditBox}
+              setShowEditBox={setShowEditBox}
+              sendEditRequest={sendEditRequest}
+              suggestText={suggestText}
+              setSuggestText={setSuggestText}
+              approveEdit={approveEdit}
+              rejectEdit={rejectEdit}
+              likeApprovedEdit={likeApprovedEdit}
+            />
+          ))}
+        </div>
+      )}
+
+      {currentPage === "profile" && (
+        <div className="profile-page">
+          <h1>👤 {username}</h1>
+
+          <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
+
+          <br />
+          <br />
+
+          <button onClick={uploadAvatar}>📷 تغيير الصورة الشخصية</button>
+
+          <hr />
+
+          <h3>📚 منشوراتي</h3>
+
+          {posts
+            .filter((post) => post.username === username)
+            .map((post) => (
+              <div key={post._id} className="my-post">
+                {post.image && (
+                  <img
+                    src={post.image}
+                    alt=""
+                    style={{
+                      width: "100%",
+                      borderRadius: "12px",
+                      marginBottom: "10px",
+                    }}
+                  />
+                )}
+
+                <p>{post.text}</p>
+
+                <p>❤️ {post.likes}</p>
+              </div>
+            ))}
+          <p>
+            📝 عدد منشوراتي:{" "}
+            {posts.filter((post) => post.username === username).length}
+          </p>
+
+          <p>
+            ❤️ مجموع الإعجابات:{" "}
+            {posts
+              .filter((post) => post.username === username)
+              .reduce((sum, post) => sum + post.likes, 0)}
+          </p>
+        </div>
+      )}
     </>
   );
 }
