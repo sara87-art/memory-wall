@@ -6,7 +6,7 @@
   align-items: center;
   padding: 15px 30px;
   border-radius: 15px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .navbar h2 {
@@ -30,4 +30,12 @@
 
 .nav-links button:hover {
   background: #262639;
+}
+.navbar-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 8px;
+  border: 2px solid white;
 }

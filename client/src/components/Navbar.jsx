@@ -10,9 +10,18 @@ function Navbar({ username, onLogout, setCurrentPage }) {
           🏠 الرئيسية
         </button>
 
-        <button onClick={() => setCurrentPage("profile")}>
-          👤 {username}
-        </button>
+    <img
+  src={
+    localStorage.getItem("avatar") ||
+    "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+  }
+  alt="avatar"
+  className="navbar-avatar"
+  onClick={() => setCurrentPage("profile")}
+  style={{ cursor: "pointer" }}
+/>
+
+
 
         <button onClick={onLogout}>
           🚪 Logout

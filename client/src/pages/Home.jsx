@@ -359,7 +359,9 @@ function Home({ onLogout, username }) {
 
     localStorage.setItem("avatar", data.avatar);
 
-    alert("تم تغيير الصورة الشخصية بنجاح ");
+   localStorage.setItem("avatar", data.avatar);
+
+window.location.reload();
   }
   return (
     <>
@@ -420,7 +422,7 @@ function Home({ onLogout, username }) {
 
       {currentPage === "profile" && (
         <div className="profile-page">
-          <h1>👤 {username}</h1>
+        
 
           <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
 
