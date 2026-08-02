@@ -634,10 +634,13 @@ app.post("/google-login", async (req, res) => {
       avatar: user.avatar,
     });
   } catch (error) {
-    res.status(401).json({
-      message: "Google login failed",
-    });
-  }
+  console.error("GOOGLE LOGIN ERROR:", error);
+
+  res.status(401).json({
+    message: "Google login failed",
+    error: error.message,
+  });
+}
 });
 const PORT = process.env.PORT || 5001;
 
