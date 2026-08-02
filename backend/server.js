@@ -600,7 +600,7 @@ app.post("/google-login", async (req, res) => {
   try {
     const { idToken } = req.body;
 
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    const decodedToken = await admin.auth.verifyIdToken(idToken);
 
     const { uid, email, name, picture } = decodedToken;
 
@@ -634,13 +634,13 @@ app.post("/google-login", async (req, res) => {
       avatar: user.avatar,
     });
   } catch (error) {
-  console.error("GOOGLE LOGIN ERROR:", error);
+    console.error("GOOGLE LOGIN ERROR:", error);
 
-  res.status(401).json({
-    message: "Google login failed",
-    error: error.message,
-  });
-}
+    res.status(401).json({
+      message: "Google login failed",
+      error: error.message,
+    });
+  }
 });
 const PORT = process.env.PORT || 5001;
 
