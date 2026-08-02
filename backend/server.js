@@ -560,7 +560,46 @@ app.patch(
     }
   },
 );
+app.patch("/users/username", verifyToken, async (req, res) => {
+  try {
+    const { username } = req.body;
 
+    if (!username || username.length < 3) {
+      return res.status(400).json({
+        message: "اسم المستخدم قصير",
+      });
+    }
+
+    const exists = await User.findOne({ username });
+
+    if (exists) {
+      return res.status(400).json({
+        message: "اسم المستخدم موجود",
+      });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    user.username = username;
+
+    await user.save();
+
+    await Post.updateMany(
+      { userId: user._id },
+      { username }
+    );
+
+    res.json({
+      username,
+      message: "تم تغيير الاسم",
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+});
 app.listen(5001, () => {
   console.log("Server running on http://localhost:5001");
 });

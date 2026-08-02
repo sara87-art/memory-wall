@@ -17,6 +17,7 @@ function Home({ onLogout, username }) {
   const [showEditBox, setShowEditBox] = useState({});
   const [currentPage, setCurrentPage] = useState("home");
   const [avatar, setAvatar] = useState(null);
+  const [newUsername, setNewUsername] = useState("");
   //useEffect(() => {
   //localStorage.setItem("posts", JSON.stringify(posts));
   //}, [posts]);
@@ -366,6 +367,33 @@ function Home({ onLogout, username }) {
 
     window.location.reload();
   }
+  async function changeUsername() {
+    const response = await fetch(
+      "https://memory-wall-rvkm.onrender.com/users/username",
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          username: newUsername,
+        }),
+      },
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return alert(data.message);
+    }
+
+    localStorage.setItem("username", data.username);
+
+    alert("تم تغيير الاسم");
+
+    window.location.reload();
+  }
   return (
     <>
       <Navbar
@@ -426,11 +454,51 @@ function Home({ onLogout, username }) {
       {currentPage === "profile" && (
         <div className="profile-page">
           <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
+          <br />
+
+          <br />
+      <div
+  style={{
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "left",
+    marginBottom: "25px",
+  }}
+>
+  <img
+    src={
+      localStorage.getItem("avatar") ||
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    }
+    alt="avatar"
+    style={{
+      width: "120px",
+      height: "120px",
+      borderRadius: "50%",
+      objectFit: "cover",
+      border: "4px solid #fff",
+      marginBottom: "10px",
+    }}
+  />
+
+ 
+</div>
+
+ <h2>{localStorage.getItem("username")}</h2>
+         
+
+          <br />
+          <input
+            type="text"
+            placeholder="اسم المستخدم الجديد"
+            value={newUsername}
+            onChange={(e) => setNewUsername(e.target.value)}
+          />
 
           <br />
           <br />
 
-          <button onClick={uploadAvatar}>📷 تغيير الصورة الشخصية</button>
+          <button onClick={changeUsername}>✏️ تغيير اسم المستخدم</button>
 
           <hr />
 
