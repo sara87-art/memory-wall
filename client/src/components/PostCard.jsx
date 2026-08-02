@@ -57,7 +57,30 @@ function PostCard({
         </>
       ) : (
         <>
-          <h4>👤 {post.username}</h4>
+        <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    marginBottom: "10px",
+  }}
+>
+  <img
+    src={
+      post.avatar ||
+      "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    }
+    alt="avatar"
+    style={{
+      width: "45px",
+      height: "45px",
+      borderRadius: "50%",
+      objectFit: "cover",
+    }}
+  />
+
+  <h4 style={{ margin: 0 }}>{post.username}</h4>
+</div>
           <p>{post.text}</p>{" "}
           <div className="button-group">
             {canEdit && (

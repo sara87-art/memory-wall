@@ -150,6 +150,13 @@ app.get("/posts", async (req, res) => {
   try {
     const posts = await Post.find().sort({ createdAt: -1 });
 
+    console.log("POSTS =", posts);
+
+    if (posts.length > 0) {
+      console.log("FIRST POST =", posts[0]);
+      console.log("FIRST POST AVATAR =", posts[0].avatar);
+    }
+
     res.json(posts);
   } catch (error) {
     res.status(500).json({
@@ -160,7 +167,7 @@ app.get("/posts", async (req, res) => {
 
 app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
-   const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
     const newPost = await Post.create({
       text: req.body.text,
 
@@ -270,10 +277,12 @@ app.patch("/posts/:id/like", async (req, res) => {
     });
   }
 });
-app.post("/posts/:id/comments", async (req, res) => {
+app.post("/posts/:id/comments", verifyToken, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
-
+    const user = await User.findById(req.user.id);
+    console.log(user);
+    console.log("COMMENT AVATAR =", user.avatar);
     if (!post) {
       return res.status(404).json({
         message: "Post not found",
@@ -281,6 +290,8 @@ app.post("/posts/:id/comments", async (req, res) => {
     }
 
     post.comments.push({
+      username: user.username,
+      avatar: user.avatar,
       text: req.body.text,
       likes: 0,
       replies: [],

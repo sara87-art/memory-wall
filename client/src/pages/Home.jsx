@@ -172,6 +172,7 @@ function Home({ onLogout, username }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
           text: comment,
@@ -181,7 +182,9 @@ function Home({ onLogout, username }) {
 
     if (response.ok) {
       const newComment = await response.json();
-
+      console.log("NEW COMMENT =", newComment);
+      console.log("COMMENT AVATAR =", newComment.avatar);
+      console.log("COMMENT USERNAME =", newComment.username);
       const newPosts = [...posts];
       newPosts[index].comments.push(newComment);
 
@@ -359,9 +362,9 @@ function Home({ onLogout, username }) {
 
     localStorage.setItem("avatar", data.avatar);
 
-   localStorage.setItem("avatar", data.avatar);
+    localStorage.setItem("avatar", data.avatar);
 
-window.location.reload();
+    window.location.reload();
   }
   return (
     <>
@@ -422,8 +425,6 @@ window.location.reload();
 
       {currentPage === "profile" && (
         <div className="profile-page">
-        
-
           <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
 
           <br />
