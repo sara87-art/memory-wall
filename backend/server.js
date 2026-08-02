@@ -639,6 +639,8 @@ app.post("/google-login", async (req, res) => {
     });
   }
 });
-app.listen(5001, () => {
-  console.log("Server running on http://localhost:5001");
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
