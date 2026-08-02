@@ -455,8 +455,12 @@ function Home({ onLogout, username }) {
         <div className="profile-page">
           <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
           <br />
-
+           <br />
+<button onClick={uploadAvatar}>
+  📷 تغيير الصورة الشخصية
+</button>
           <br />
+           <br />
       <div
   style={{
     display: "flex",

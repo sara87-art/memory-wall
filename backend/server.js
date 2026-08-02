@@ -10,7 +10,7 @@ const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const Post = require("./models/Post");
-
+const admin = require("./firebase-admin");
 const app = express();
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -584,19 +584,58 @@ app.patch("/users/username", verifyToken, async (req, res) => {
 
     await user.save();
 
-    await Post.updateMany(
-      { userId: user._id },
-      { username }
-    );
+    await Post.updateMany({ userId: user._id }, { username });
 
     res.json({
       username,
       message: "تم تغيير الاسم",
     });
-
   } catch (err) {
     res.status(500).json({
       message: err.message,
+    });
+  }
+});
+app.post("/google-login", async (req, res) => {
+  try {
+    const { idToken } = req.body;
+
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    const { uid, email, name, picture } = decodedToken;
+
+    let user = await User.findOne({ googleId: uid });
+
+    if (!user) {
+      user = await User.create({
+        googleId: uid,
+        username: name || email,
+        email,
+        avatar: picture,
+        role: "user",
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        username: user.username,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    res.json({
+      token,
+      username: user.username,
+      role: user.role,
+      avatar: user.avatar,
+    });
+  } catch (error) {
+    res.status(401).json({
+      message: "Google login failed",
     });
   }
 });

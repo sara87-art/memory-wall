@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../firebase";
 function Login({ onLogin, goToSignup }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -35,7 +36,42 @@ function Login({ onLogin, goToSignup }) {
       alert("حدث خطأ أثناء تسجيل الدخول");
     }
   };
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
 
+      const idToken = await result.user.getIdToken();
+
+      const res = await fetch(
+        "https://memory-wall-rvkm.onrender.com/google-login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idToken,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return alert(data.message);
+      }
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("avatar", data.avatar);
+
+      onLogin(data.username, data.role);
+    } catch (error) {
+      console.error(error);
+      alert("Google Login Failed");
+    }
+  };
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Welcome Back</h2>
@@ -64,7 +100,12 @@ function Login({ onLogin, goToSignup }) {
         <button type="submit">Login</button>
         <br />
         <br />
+        <br />
+        <br />
 
+        <button type="button" onClick={handleGoogleLogin}>
+          Sign in with Google
+        </button>
         <p>Don't have an account?</p>
 
         <button type="button" onClick={goToSignup}>

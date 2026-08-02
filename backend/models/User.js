@@ -11,7 +11,17 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true,
+      default: "",
+    },
+
+    googleId: {
+      type: String,
+      default: "",
+    },
+
+    email: {
+      type: String,
+      default: "",
     },
 
     role: {
@@ -21,6 +31,15 @@ const userSchema = new mongoose.Schema(
     },
 
     avatar: {
+      type: String,
+      default: "",
+    },
+    googleId: {
+      type: String,
+      default: "",
+    },
+
+    email: {
       type: String,
       default: "",
     },
