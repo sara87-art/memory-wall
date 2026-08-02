@@ -1,8 +1,6 @@
 const { initializeApp, cert } = require("firebase-admin/app");
 const admin = require("firebase-admin");
 
-const { initializeApp, cert } = require("firebase-admin/app");
-const admin = require("firebase-admin");
 
 initializeApp({
   credential: cert({
@@ -12,6 +10,5 @@ initializeApp({
   }),
 });
 
-module.exports = admin;
 
 module.exports = admin;
