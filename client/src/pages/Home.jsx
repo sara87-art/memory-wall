@@ -455,41 +455,36 @@ function Home({ onLogout, username }) {
         <div className="profile-page">
           <input type="file" onChange={(e) => setAvatar(e.target.files[0])} />
           <br />
-           <br />
-<button onClick={uploadAvatar}>
-  📷 تغيير الصورة الشخصية
-</button>
           <br />
-           <br />
-      <div
-  style={{
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "left",
-    marginBottom: "25px",
-  }}
->
-  <img
-    src={
-      localStorage.getItem("avatar") ||
-      "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-    }
-    alt="avatar"
-    style={{
-      width: "120px",
-      height: "120px",
-      borderRadius: "50%",
-      objectFit: "cover",
-      border: "4px solid #fff",
-      marginBottom: "10px",
-    }}
-  />
+          <button onClick={uploadAvatar}>📷 تغيير الصورة الشخصية</button>
+          <br />
+          <br />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "left",
+              marginBottom: "25px",
+            }}
+          >
+            <img
+              src={
+                localStorage.getItem("avatar") ||
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+              }
+              alt="avatar"
+              style={{
+                width: "120px",
+                height: "120px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "4px solid #fff",
+                marginBottom: "10px",
+              }}
+            />
+          </div>
 
- 
-</div>
-
- <h2>{localStorage.getItem("username")}</h2>
-         
+          <h2>{localStorage.getItem("username")}</h2>
 
           <br />
           <input

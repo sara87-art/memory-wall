@@ -545,14 +545,19 @@ app.patch(
         });
       }
 
-      user.avatar = req.file.path;
+     user.avatar = req.file.path;
 
-      await user.save();
+await user.save();
 
-      res.json({
-        message: "Avatar updated",
-        avatar: user.avatar,
-      });
+await Post.updateMany(
+  { userId: user._id },
+  { avatar: user.avatar }
+);
+
+res.json({
+  message: "Avatar updated",
+  avatar: user.avatar,
+});
     } catch (error) {
       res.status(500).json({
         message: error.message,

@@ -23,3 +23,32 @@
         transform:translateY(0);
     }
 }
+.auth-input {
+  width: 100%;
+ 
+  padding: 14px 18px;
+ 
+  margin: 12px 0;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 14px;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  backdrop-filter: blur(10px);
+  transition: .3s;
+}
+
+.auth-input::placeholder {
+  color: #bfbfbf;
+}
+
+.auth-input:hover {
+  border-color: rgba(255,255,255,.35);
+}
+
+.auth-input:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 15px rgba(139,92,246,.35);
+  background: rgba(255,255,255,.12);
+}

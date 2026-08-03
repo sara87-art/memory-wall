@@ -75,24 +75,21 @@ function Login({ onLogin, goToSignup }) {
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Welcome Back</h2>
-
+ <br />
+        <br />
+         <br />
       <form onSubmit={handleLogin}>
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+      <input
+  className="auth-input"
+  type="text"
+  placeholder="Username"
+/>
 
-        <br />
-        <br />
-
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+<input
+  className="auth-input"
+  type="password"
+  placeholder="Password"
+/>
 
         <br />
         <br />
@@ -100,14 +97,16 @@ function Login({ onLogin, goToSignup }) {
         <button type="submit">Login</button>
         <br />
         <br />
-        <br />
-        <br />
+       
 
         <button type="button" onClick={handleGoogleLogin}>
           Sign in with Google
         </button>
+         <br />
+        <br />
         <p>Don't have an account?</p>
-
+ <br />
+        <br />
         <button type="button" onClick={goToSignup}>
           Create Account
         </button>
