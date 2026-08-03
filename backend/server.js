@@ -335,37 +335,46 @@ app.patch("/posts/:postId/comments/:commentId/like", async (req, res) => {
     });
   }
 });
-app.post("/posts/:postId/comments/:commentId/replies", async (req, res) => {
-  try {
-    const post = await Post.findById(req.params.postId);
+app.post(
+  "/posts/:postId/comments/:commentId/replies",
+  verifyToken,
+  async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.postId);
 
-    if (!post) {
-      return res.status(404).json({
-        message: "Post not found",
+      if (!post) {
+        return res.status(404).json({
+          message: "Post not found",
+        });
+      }
+
+      const comment = post.comments.id(req.params.commentId);
+
+      if (!comment) {
+        return res.status(404).json({
+          message: "Comment not found",
+        });
+      }
+
+      const user = await User.findById(req.user.id);
+
+      comment.replies.push({
+        username: user.username,
+        avatar: user.avatar,
+        text: req.body.text,
+        likes: 0,
+      });
+
+      await post.save();
+
+      res.status(201).json(comment.replies[comment.replies.length - 1]);
+    } catch (error) {
+      res.status(500).json({
+        message: error.message,
       });
     }
-
-    const comment = post.comments.id(req.params.commentId);
-
-    if (!comment) {
-      return res.status(404).json({
-        message: "Comment not found",
-      });
-    }
-
-    comment.replies.push({
-      text: req.body.text,
-    });
-
-    await post.save();
-
-    res.status(201).json(comment.replies[comment.replies.length - 1]);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
   }
-});
+);
 app.post("/posts/:id/edit-request", async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);

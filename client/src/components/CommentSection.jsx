@@ -27,7 +27,7 @@ function CommentSection({
       </div>{" "}
       {(showAllComments[index]
         ? (post.comments ?? [])
-        : (post.comments ?? []).slice(0, 3)
+        : (post.comments ?? []).slice(0, 1)
       ).map((item, i) => (
         <div className="comment" key={item._id || item.id || i}>
           <div
@@ -78,14 +78,38 @@ function CommentSection({
               </div>
             </>
           )}
-          {(item.replies ?? []).map((replyItem) => (
-            <p
-              key={replyItem._id || replyItem.id}
-              style={{ marginLeft: "25px" }}
-            >
-              ↳ {replyItem.text}
-            </p>
-          ))}
+        {(item.replies ?? []).map((replyItem, j) => (
+  <div
+    key={replyItem._id || replyItem.id || j}
+    className="reply"
+    style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+      marginLeft: "25px",
+      marginTop: "10px",
+    }}
+  >
+    <img
+      src={
+        replyItem.avatar ||
+        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+      }
+      alt="avatar"
+      style={{
+        width: "30px",
+        height: "30px",
+        borderRadius: "50%",
+        objectFit: "cover",
+      }}
+    />
+
+    <div>
+      <strong>{replyItem.username}</strong>
+      <p style={{ margin: 0 }}>↳ {replyItem.text}</p>
+    </div>
+  </div>
+))}
         </div>
       ))}{" "}
       {(post.comments ?? []).length > 3 && (

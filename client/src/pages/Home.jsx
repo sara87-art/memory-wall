@@ -214,34 +214,37 @@ function Home({ onLogout, username }) {
     }
   }
   async function addReply(postIndex, commentIndex) {
-    if (!reply.trim()) return;
+  if (!reply.trim()) return;
 
-    const post = posts[postIndex];
-    const comment = post.comments[commentIndex];
+  const token = localStorage.getItem("token");
 
-    const response = await fetch(
-      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: reply,
-        }),
+  const post = posts[postIndex];
+  const comment = post.comments[commentIndex];
+
+  const response = await fetch(
+    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
-    );
-
-    if (response.ok) {
-      const newReply = await response.json();
-
-      const newPosts = [...posts];
-      newPosts[postIndex].comments[commentIndex].replies.push(newReply);
-
-      setPosts(newPosts);
-      setReply("");
+      body: JSON.stringify({
+        text: reply,
+      }),
     }
+  );
+
+  if (response.ok) {
+    const newReply = await response.json();
+
+    const newPosts = [...posts];
+    newPosts[postIndex].comments[commentIndex].replies.push(newReply);
+
+    setPosts(newPosts);
+    setReply("");
   }
+}
   async function sendEditRequest(postIndex) {
     const post = posts[postIndex];
 
