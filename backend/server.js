@@ -687,7 +687,8 @@ async function checkImage(imageUrl) {
 
     return data;
   } catch (err) {
-    console.error("SIGHTENGINE ERROR:", err.response?.data || err.message);
+    console.log("SIGHTENGINE ERROR:");
+    console.log(err.response?.data || err.message);
     throw err;
   }
 }
