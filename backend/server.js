@@ -168,19 +168,21 @@ app.get("/posts", async (req, res) => {
 app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    if (req.file) {
-      const result = await checkImage(req.file.path);
+ if (req.file) {
+  const result = await checkImage(req.file.path);
 
-      if (
-        result.nudity.sexual_activity > 0.5 ||
-        result.nudity.explicit > 0.5 ||
-        result.gore.prob > 0.5
-      ) {
-        return res.status(400).json({
-          message: "الصورة تحتوي على محتوى غير مسموح.",
-        });
-      }
-    }
+  if (
+    result.nudity.explicit > 0.3 ||
+    result.nudity.sexual_activity > 0.3 ||
+    result.nudity.erotica > 0.5 ||
+    result.nudity.very_suggestive > 0.5 ||
+    result.gore.prob > 0.3
+  ) {
+    return res.status(400).json({
+      message: "الصورة تحتوي على محتوى غير مسموح.",
+    });
+  }
+}
     const newPost = await Post.create({
       text: req.body.text,
 

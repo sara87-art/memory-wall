@@ -18,6 +18,7 @@ function Home({ onLogout, username }) {
   const [currentPage, setCurrentPage] = useState("home");
   const [avatar, setAvatar] = useState(null);
   const [newUsername, setNewUsername] = useState("");
+  const [error, setError] = useState("");
   //useEffect(() => {
   //localStorage.setItem("posts", JSON.stringify(posts));
   //}, [posts]);
@@ -37,7 +38,7 @@ function Home({ onLogout, username }) {
   }, []);
   async function addPost() {
     if (!text) return;
-
+    setError(error.response?.data?.message || "حدث خطأ");
     const formData = new FormData();
     formData.append("text", text);
 
@@ -63,7 +64,12 @@ function Home({ onLogout, username }) {
       console.log("Response:", result);
 
       if (!response.ok) {
-        alert("فشل إرسال المنشور");
+        const data = await response.json();
+
+        setError(data.message || "فشل إرسال المنشور");
+setTimeout(() => {
+  setError("");
+}, 3000);
         return;
       }
 
@@ -75,6 +81,11 @@ function Home({ onLogout, username }) {
       setImage(null);
     } catch (error) {
       console.error(error);
+      setError("حدث خطأ أثناء رفع المنشور");
+
+setTimeout(() => {
+  setError("");
+}, 3000);
     }
   }
   async function addLike(index) {
@@ -214,37 +225,37 @@ function Home({ onLogout, username }) {
     }
   }
   async function addReply(postIndex, commentIndex) {
-  if (!reply.trim()) return;
+    if (!reply.trim()) return;
 
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
-  const post = posts[postIndex];
-  const comment = post.comments[commentIndex];
+    const post = posts[postIndex];
+    const comment = post.comments[commentIndex];
 
-  const response = await fetch(
-    `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+    const response = await fetch(
+      `https://memory-wall-rvkm.onrender.com/posts/${post._id || post.id}/comments/${comment._id || comment.id}/replies`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          text: reply,
+        }),
       },
-      body: JSON.stringify({
-        text: reply,
-      }),
+    );
+
+    if (response.ok) {
+      const newReply = await response.json();
+
+      const newPosts = [...posts];
+      newPosts[postIndex].comments[commentIndex].replies.push(newReply);
+
+      setPosts(newPosts);
+      setReply("");
     }
-  );
-
-  if (response.ok) {
-    const newReply = await response.json();
-
-    const newPosts = [...posts];
-    newPosts[postIndex].comments[commentIndex].replies.push(newReply);
-
-    setPosts(newPosts);
-    setReply("");
   }
-}
   async function sendEditRequest(postIndex) {
     const post = posts[postIndex];
 
@@ -412,7 +423,7 @@ function Home({ onLogout, username }) {
             setImage={setImage}
             addPost={addPost}
           />
-
+          {error && <p className="error-message">{error}</p>}
           <hr />
 
           <h3>المنشورات</h3>
