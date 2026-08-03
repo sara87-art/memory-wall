@@ -8,7 +8,7 @@ const cors = require("cors");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
-
+const axios = require("axios");
 const Post = require("./models/Post");
 const admin = require("./firebase-admin");
 const app = express();
@@ -168,6 +168,19 @@ app.get("/posts", async (req, res) => {
 app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    if (req.file) {
+      const result = await checkImage(req.file.path);
+
+      if (
+        result.nudity.sexual_activity > 0.5 ||
+        result.nudity.explicit > 0.5 ||
+        result.gore.prob > 0.5
+      ) {
+        return res.status(400).json({
+          message: "الصورة تحتوي على محتوى غير مسموح.",
+        });
+      }
+    }
     const newPost = await Post.create({
       text: req.body.text,
 
@@ -189,6 +202,8 @@ app.post("/posts", verifyToken, upload.single("image"), async (req, res) => {
 
     res.status(201).json(newPost);
   } catch (error) {
+    console.error("POST ERROR:", error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -373,7 +388,7 @@ app.post(
         message: error.message,
       });
     }
-  }
+  },
 );
 app.post("/posts/:id/edit-request", async (req, res) => {
   try {
@@ -554,19 +569,16 @@ app.patch(
         });
       }
 
-     user.avatar = req.file.path;
+      user.avatar = req.file.path;
 
-await user.save();
+      await user.save();
 
-await Post.updateMany(
-  { userId: user._id },
-  { avatar: user.avatar }
-);
+      await Post.updateMany({ userId: user._id }, { avatar: user.avatar });
 
-res.json({
-  message: "Avatar updated",
-  avatar: user.avatar,
-});
+      res.json({
+        message: "Avatar updated",
+        avatar: user.avatar,
+      });
     } catch (error) {
       res.status(500).json({
         message: error.message,
@@ -657,7 +669,28 @@ app.post("/google-login", async (req, res) => {
   }
 });
 const PORT = process.env.PORT || 5001;
+async function checkImage(imageUrl) {
+  try {
+    const { data } = await axios.get(
+      "https://api.sightengine.com/1.0/check.json",
+      {
+        params: {
+          models: "nudity-2.1,gore-2.0",
+          url: imageUrl,
+          api_user: process.env.SIGHTENGINE_USER,
+          api_secret: process.env.SIGHTENGINE_SECRET,
+        },
+      },
+    );
 
+    console.log("SIGHTENGINE RESULT:", data);
+
+    return data;
+  } catch (err) {
+    console.error("SIGHTENGINE ERROR:", err.response?.data || err.message);
+    throw err;
+  }
+}
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
