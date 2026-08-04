@@ -15,7 +15,7 @@ function CommentSection({
 }) {
   return (
     <>
-      <h3>💬 التعليقات</h3>
+      <p>💬 {post.comments?.length || 0}</p>
       <div className="comment-input">
         <input
           type="text"
@@ -78,38 +78,38 @@ function CommentSection({
               </div>
             </>
           )}
-        {(item.replies ?? []).map((replyItem, j) => (
-  <div
-    key={replyItem._id || replyItem.id || j}
-    className="reply"
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      marginLeft: "25px",
-      marginTop: "10px",
-    }}
-  >
-    <img
-      src={
-        replyItem.avatar ||
-        "https://cdn-icons-png.flaticon.com/512/149/149071.png"
-      }
-      alt="avatar"
-      style={{
-        width: "30px",
-        height: "30px",
-        borderRadius: "50%",
-        objectFit: "cover",
-      }}
-    />
+          {(item.replies ?? []).map((replyItem, j) => (
+            <div
+              key={replyItem._id || replyItem.id || j}
+              className="reply"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginLeft: "25px",
+                marginTop: "10px",
+              }}
+            >
+              <img
+                src={
+                  replyItem.avatar ||
+                  "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                }
+                alt="avatar"
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                }}
+              />
 
-    <div>
-      <strong>{replyItem.username}</strong>
-      <p style={{ margin: 0 }}>↳ {replyItem.text}</p>
-    </div>
-  </div>
-))}
+              <div>
+                <strong>{replyItem.username}</strong>
+                <p style={{ margin: 0 }}>↳ {replyItem.text}</p>
+              </div>
+            </div>
+          ))}
         </div>
       ))}{" "}
       {(post.comments ?? []).length > 3 && (

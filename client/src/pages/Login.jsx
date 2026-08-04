@@ -75,8 +75,7 @@ function Login({ onLogin, goToSignup }) {
   return (
     <div style={{ textAlign: "center", marginTop: "100px" }}>
       <h2>Welcome Back</h2>
-      <br />
-      <br />
+
       <br />
       <form onSubmit={handleLogin}>
         <input

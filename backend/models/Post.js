@@ -1,7 +1,19 @@
 const mongoose = require("mongoose");
 
 const replySchema = new mongoose.Schema({
+  username: String,
+
+  avatar: {
+    type: String,
+    default: "",
+  },
+
   text: String,
+
+  likes: {
+    type: Number,
+    default: 0,
+  },
 });
 
 const commentSchema = new mongoose.Schema({

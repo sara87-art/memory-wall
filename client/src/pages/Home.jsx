@@ -38,7 +38,7 @@ function Home({ onLogout, username }) {
   }, []);
   async function addPost() {
     if (!text) return;
-    setError(error.response?.data?.message || "حدث خطأ");
+
     const formData = new FormData();
     formData.append("text", text);
 
@@ -67,9 +67,9 @@ function Home({ onLogout, username }) {
         const data = await response.json();
 
         setError(data.message || "فشل إرسال المنشور");
-setTimeout(() => {
-  setError("");
-}, 3000);
+        setTimeout(() => {
+          setError("");
+        }, 3000);
         return;
       }
 
@@ -83,9 +83,9 @@ setTimeout(() => {
       console.error(error);
       setError("حدث خطأ أثناء رفع المنشور");
 
-setTimeout(() => {
-  setError("");
-}, 3000);
+      setTimeout(() => {
+        setError("");
+      }, 3000);
     }
   }
   async function addLike(index) {
